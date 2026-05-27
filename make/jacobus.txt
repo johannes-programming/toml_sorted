@@ -1,0 +1,15 @@
+--indent=4
+**/*.cfg
+**/*.css
+**/*.html
+**/*.in
+**/*.js
+**/*.json
+**/*.py
+**/*.rst
+**/*.toml
+**/*.txt
+**/*.typed
+**/*.zsh
+**/.gitignore
+**/Makefile
