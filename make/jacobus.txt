@@ -1,0 +1,16 @@
+.
+--indent=4
+--f=**/*.cfg
+--f=**/*.css
+--f=**/*.html
+--f=**/*.in
+--f=**/*.js
+--f=**/*.json
+--f=**/*.py
+--f=**/*.rst
+--f=**/*.toml
+--f=**/*.txt
+--f=**/*.typed
+--f=**/*.zsh
+--f=**/.gitignore
+--f=**/Makefile
