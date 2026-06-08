@@ -43,12 +43,32 @@ def run(
     *,
     targets: Optional[list[Optional[int | str]]] = None,
 ) -> None:
+    data: Any
     file: str
     keyss: list[list[list]]
     keyss = parse_targets(targets)
     for file in files:
+        data = load(file)
         for keys in keyss:
-            go(file=file, keys=keys)
+            data = go(data=data, keys=keys)
+        dump(file, data)
+
+
+def load(file: str) -> dict[str, Any]:
+    stream: Any
+    if file == "-":
+        return tomllib.loads(input())
+    with open(file, "rb") as stream:
+        return tomllib.load(stream)
+
+
+def dump(file: str, data: dict[str, Any]) -> None:
+    stream: Any
+    if file == "-":
+        print(tomli_w.dumps(data), end="")
+        return
+    with open(file, "wb") as stream:
+        tomli_w.dump(data, stream)
 
 
 def parse_targets(targets: Optional[list[Optional[int | str]]] = None):
@@ -65,19 +85,12 @@ def parse_targets(targets: Optional[list[Optional[int | str]]] = None):
 
 
 def go(
-    file: str,
-    *,
+    data: Any,
     keys: Sequence[int | str] = (),
 ) -> None:
     data: dict[str, Any]
     key: int | str
-    stream: Any
     target: Any
-    if file == "-":
-        data = tomllib.loads(input())
-    else:
-        with open(file, "rb") as stream:
-            data = tomllib.load(stream)
     if len(keys):
         target = data
         for key in keys[:-1]:
@@ -86,11 +99,7 @@ def go(
         target[key] = sorted_data(data=target[key])
     else:
         data = sorted_data(data=data)
-    if file == "-":
-        print(tomli_w.dumps(data), end="")
-        return
-    with open(file, "wb") as stream:
-        tomli_w.dump(data, stream)
+    return data
 
 
 def sorted_data(*, data: Any) -> Any:
