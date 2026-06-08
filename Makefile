@@ -19,15 +19,7 @@ jacobus: works
 
 toml_sort: works
 	conda run -n works pip install 'tomli_w>=1.0,<2';
-	conda run -n works python make/toml_sort.py --file=pyproject.toml
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=build-system
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=build-system --key=requires
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=project
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=project --key=classifiers
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=project --key=dependencies
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=project --key=urls
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=tool
-	conda run -n works python make/toml_sort.py --file=pyproject.toml --key=tool --key=mypy
+	conda run -n works python make/toml_sort.py @make/toml_sort.txt
 
 beautify: isort black jacobus toml_sort
 

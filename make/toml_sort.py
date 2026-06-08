@@ -13,40 +13,55 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
     space: argparse.Namespace
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument(
-        "--file",
-        action="append",
+        "files",
+        nargs="*",
         default=[],
-        dest="files",
     )
     parser.add_argument(
         "--key",
         action="append",
-        default=[],
-        dest="keys",
+        dest="targets",
     )
     parser.add_argument(
-        "--reverse",
-        action="store_true",
+        "--sort",
+        action="append_const",
+        const=None,
+        dest="targets",
     )
     space = parser.parse_args(args)
     run(**vars(space))
 
 
 def run(
+    files: Iterable[str] = (),
     *,
-    files: list[str],
-    **kwargs: Any,
+    targets: Optional[list[Optional[str]]] = None,
 ) -> None:
     file: str
+    keyss: list[list[list]]
+    keyss = parse_targets(targets)
     for file in files:
-        run_file(file, **kwargs)
+        for keys in keyss:
+            go(file=file, keys=keys)
 
 
-def run_file(
+def parse_targets(targets: Optional[list[Optional[str]]] = None):
+    ans: list[list[str]]
+    ans = list()
+    if targets is None:
+        return ans
+    for x in targets:
+        if x is None:
+            ans.append(list())
+        elif len(ans):
+            ans[-1].append(x)
+    return ans
+
+
+def go(
     file: str,
     *,
     keys: Sequence[str] = (),
-    reverse: bool = False,
 ) -> None:
     data: dict[str, Any]
     key: int | str
@@ -65,9 +80,9 @@ def run_file(
             key = str(keys[-1])
         else:
             key = int(keys[-1])
-        target[key] = sorted_data(data=target[key], reverse=reverse)
+        target[key] = sorted_data(data=target[key])
     else:
-        data = sorted_data(data=data, reverse=reverse)
+        data = sorted_data(data=data)
     if file == "-":
         print(tomli_w.dumps(data), end="")
         return
@@ -75,11 +90,11 @@ def run_file(
         tomli_w.dump(data, stream)
 
 
-def sorted_data(*, data: Any, reverse: bool) -> Any:
+def sorted_data(*, data: Any) -> Any:
     if isinstance(data, dict):
-        return dict(sorted(data.items(), reverse=reverse))
+        return dict(sorted(data.items()))
     else:
-        return type(data)(sorted(data, reverse=reverse))
+        return type(data)(sorted(data))
 
 
 if __name__ == "__main__":
