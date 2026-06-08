@@ -1,6 +1,8 @@
 import argparse
+import os
 import tomllib
 from collections.abc import Iterable, Sequence
+from pathlib import Path
 from typing import Any, Optional
 
 import tomli_w
@@ -44,17 +46,18 @@ def run(
     instructions: Optional[list[Optional[int | str]]] = None,
 ) -> None:
     data: Any
-    file: str
+    pattern: str
     keyss: list[list[list]]
     keyss = parse_instructions(instructions)
-    for file in files:
-        data = load(file)
-        for keys in keyss:
-            data = go(data=data, keys=keys)
-        dump(file, data)
+    for pattern in files:
+        for path in Path(os.getcwd()).glob(pattern):
+            data = load(path)
+            for keys in keyss:
+                data = go(data=data, keys=keys)
+            dump(path, data)
 
 
-def load(file: str) -> dict[str, Any]:
+def load(file: Path) -> dict[str, Any]:
     stream: Any
     if file == "-":
         return tomllib.loads(input())
@@ -62,7 +65,7 @@ def load(file: str) -> dict[str, Any]:
         return tomllib.load(stream)
 
 
-def dump(file: str, data: dict[str, Any]) -> None:
+def dump(file: Path, data: dict[str, Any]) -> None:
     stream: Any
     if file == "-":
         print(tomli_w.dumps(data), end="")
