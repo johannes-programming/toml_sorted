@@ -23,6 +23,12 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         dest="targets",
     )
     parser.add_argument(
+        "--index",
+        action="append",
+        dest="targets",
+        type=int,
+    )
+    parser.add_argument(
         "--sort",
         action="append_const",
         const=None,
@@ -35,7 +41,7 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
 def run(
     files: Iterable[str] = (),
     *,
-    targets: Optional[list[Optional[str]]] = None,
+    targets: Optional[list[Optional[int | str]]] = None,
 ) -> None:
     file: str
     keyss: list[list[list]]
@@ -45,8 +51,8 @@ def run(
             go(file=file, keys=keys)
 
 
-def parse_targets(targets: Optional[list[Optional[str]]] = None):
-    ans: list[list[str]]
+def parse_targets(targets: Optional[list[Optional[int | str]]] = None):
+    ans: list[list[int | str]]
     ans = list()
     if targets is None:
         return ans
@@ -61,7 +67,7 @@ def parse_targets(targets: Optional[list[Optional[str]]] = None):
 def go(
     file: str,
     *,
-    keys: Sequence[str] = (),
+    keys: Sequence[int | str] = (),
 ) -> None:
     data: dict[str, Any]
     key: int | str
@@ -75,11 +81,8 @@ def go(
     if len(keys):
         target = data
         for key in keys[:-1]:
-            target = target[str(key) if isinstance(target, dict) else int(key)]
-        if isinstance(target, dict):
-            key = str(keys[-1])
-        else:
-            key = int(keys[-1])
+            target = target[key]
+        key = keys[-1]
         target[key] = sorted_data(data=target[key])
     else:
         data = sorted_data(data=data)
