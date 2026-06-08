@@ -20,19 +20,19 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
     parser.add_argument(
         "--key",
         action="append",
-        dest="targets",
+        dest="instructions",
     )
     parser.add_argument(
         "--index",
         action="append",
-        dest="targets",
+        dest="instructions",
         type=int,
     )
     parser.add_argument(
         "--sort",
         action="append_const",
         const=None,
-        dest="targets",
+        dest="instructions",
     )
     space = parser.parse_args(args)
     run(**vars(space))
@@ -41,12 +41,12 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
 def run(
     files: Iterable[str] = (),
     *,
-    targets: Optional[list[Optional[int | str]]] = None,
+    instructions: Optional[list[Optional[int | str]]] = None,
 ) -> None:
     data: Any
     file: str
     keyss: list[list[list]]
-    keyss = parse_targets(targets)
+    keyss = parse_instructions(instructions)
     for file in files:
         data = load(file)
         for keys in keyss:
@@ -71,12 +71,14 @@ def dump(file: str, data: dict[str, Any]) -> None:
         tomli_w.dump(data, stream)
 
 
-def parse_targets(targets: Optional[list[Optional[int | str]]] = None):
+def parse_instructions(
+    instructions: Optional[list[Optional[int | str]]] = None,
+):
     ans: list[list[int | str]]
     ans = list()
-    if targets is None:
+    if instructions is None:
         return ans
-    for x in targets:
+    for x in instructions:
         if x is None:
             ans.append(list())
         elif len(ans):
@@ -85,20 +87,18 @@ def parse_targets(targets: Optional[list[Optional[int | str]]] = None):
 
 
 def go(
-    data: Any,
+    data: dict[str, Any],
     keys: Sequence[int | str] = (),
-) -> None:
-    data: dict[str, Any]
+) -> dict[str, Any]:
     key: int | str
     target: Any
-    if len(keys):
-        target = data
-        for key in keys[:-1]:
-            target = target[key]
-        key = keys[-1]
-        target[key] = sorted_data(data=target[key])
-    else:
-        data = sorted_data(data=data)
+    if len(keys) == 0:
+        return sorted_data(data=data)
+    target = data
+    for key in keys[:-1]:
+        target = target[key]
+    key = keys[-1]
+    target[key] = sorted_data(data=target[key])
     return data
 
 
