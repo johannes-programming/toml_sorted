@@ -13,9 +13,10 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
     space: argparse.Namespace
     parser = argparse.ArgumentParser(fromfile_prefix_chars="@")
     parser.add_argument(
-        "--infile",
-        default="-",
-        dest="infile",
+        "--file",
+        action="append",
+        default=[],
+        dest="files",
     )
     parser.add_argument(
         "--key",
@@ -27,30 +28,34 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         "--reverse",
         action="store_true",
     )
-    parser.add_argument(
-        "--outfile",
-        default="-",
-        dest="outfile",
-    )
     space = parser.parse_args(args)
     run(**vars(space))
 
 
 def run(
     *,
-    infile: str = "-",
+    files: list[str],
+    **kwargs: Any,
+) -> None:
+    file: str
+    for file in files:
+        run_file(file, **kwargs)
+
+
+def run_file(
+    file: str,
+    *,
     keys: Sequence[str] = (),
     reverse: bool = False,
-    outfile: str = "-",
 ) -> None:
     data: dict[str, Any]
     key: int | str
     stream: Any
     target: Any
-    if infile == "-":
+    if file == "-":
         data = tomllib.loads(input())
     else:
-        with open(infile, "rb") as stream:
+        with open(file, "rb") as stream:
             data = tomllib.load(stream)
     if len(keys):
         target = data
@@ -63,10 +68,10 @@ def run(
         target[key] = sorted_data(data=target[key], reverse=reverse)
     else:
         data = sorted_data(data=data, reverse=reverse)
-    if outfile == "-":
+    if file == "-":
         print(tomli_w.dumps(data), end="")
         return
-    with open(outfile, "wb") as stream:
+    with open(file, "wb") as stream:
         tomli_w.dump(data, stream)
 
 
