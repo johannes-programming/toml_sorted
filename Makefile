@@ -1,5 +1,5 @@
 .ONESHELL:
-.PHONY: isort black jacobus toml_sorted beautify commit clean build upload pypi test version works
+.PHONY: isort black jacobus toml_sort beautify commit clean build upload pypi test version works
 
 works:
 	@conda env list | awk '{print $$1}' | grep -qx 'works' \
@@ -17,19 +17,11 @@ jacobus: works
 	conda run -n works pip install 'jacobus>=1.0,<2';
 	conda run -n works python -m jacobus @make/jacobus.txt
 
-toml_sorted: works
-	conda run -n works pip install 'toml_sorted>=1.0,<2';
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=build-system --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=build-system --key=requires --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=project --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=project --key=classifiers --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=project --key=dependencies --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=project --key=urls --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=tool --outfile=pyproject.toml
-	conda run -n works python -m toml_sorted --infile=pyproject.toml --key=tool --key=mypy --outfile=pyproject.toml
+toml_sort: works
+	conda run -n works pip install 'tomli_w>=1.0,<2';
+	conda run -n works python make/toml_sort.py @make/toml_sort.txt
 
-beautify: isort black jacobus toml_sorted
+beautify: isort black jacobus toml_sort
 
 commit: works
 	git add -A;
