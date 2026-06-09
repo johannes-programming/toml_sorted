@@ -1,129 +1,53 @@
-from __future__ import annotations
-
-import io
 import tempfile
+import tomllib
 import unittest
-from contextlib import redirect_stdout
 from pathlib import Path
-from unittest.mock import patch
+from typing import Self
 
-from toml_sorted.core import main, run, sorted_data
+import tomli_w
 
+from toml_sorted.core.run import run
+from toml_sorted.enum.Instruction import Instruction
 
-class TestSortedData(unittest.TestCase):
-    def test_sorts_dict_keys(self) -> None:
-        self.assertEqual(
-            sorted_data(data={"z": 1, "a": 2, "m": 3}, reverse=False),
-            {"a": 2, "m": 3, "z": 1},
-        )
-
-    def test_sorts_sequences(self) -> None:
-        self.assertEqual(sorted_data(data=[3, 1, 2], reverse=False), [1, 2, 3])
-        self.assertEqual(sorted_data(data=(3, 1, 2), reverse=True), (3, 2, 1))
+__all__ = ["TestTomlSort"]
 
 
-class TestRun(unittest.TestCase):
-    def test_sorts_top_level_keys_from_file_to_file(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            infile = root / "input.toml"
-            outfile = root / "output.toml"
-            infile.write_text("z = 3\na = 1\nm = 2\n", encoding="utf-8")
+class TestTomlSort(unittest.TestCase):
 
-            run(infile=str(infile), outfile=str(outfile))
+    def test_run_sorts_matching_toml_file(self: Self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "example.toml"
 
-            self.assertEqual(
-                outfile.read_text(encoding="utf-8"), "a = 1\nm = 2\nz = 3\n"
-            )
-
-    def test_reverse_sorts_top_level_keys_from_file_to_file(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            infile = root / "input.toml"
-            outfile = root / "output.toml"
-            infile.write_text("a = 1\nz = 3\nm = 2\n", encoding="utf-8")
-
-            run(infile=str(infile), reverse=True, outfile=str(outfile))
-
-            self.assertEqual(
-                outfile.read_text(encoding="utf-8"), "z = 3\nm = 2\na = 1\n"
-            )
-
-    def test_sorts_selected_nested_list(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            infile = root / "input.toml"
-            outfile = root / "output.toml"
-            infile.write_text(
-                "[tool.demo]\nvalues = [3, 1, 2]\n", encoding="utf-8"
-            )
+            with path.open("wb") as stream:
+                tomli_w.dump({"b": 2, "a": 1}, stream)
 
             run(
-                infile=str(infile),
-                keys=["tool", "demo", "values"],
-                outfile=str(outfile),
+                str(path),
+                instructions=[Instruction.SORT],
             )
 
-            self.assertEqual(
-                outfile.read_text(encoding="utf-8"),
-                "[tool.demo]\nvalues = [\n    1,\n    2,\n    3,\n]\n",
+            with path.open("rb") as stream:
+                result = tomllib.load(stream)
+
+        self.assertEqual(result, {"a": 1, "b": 2})
+
+    def test_run_ignores_duplicate_glob_matches(self: Self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "example.toml"
+
+            with path.open("wb") as stream:
+                tomli_w.dump({"b": 2, "a": 1}, stream)
+
+            run(
+                str(path),
+                str(path),
+                instructions=[Instruction.SORT],
             )
 
-    def test_reads_stdin_and_writes_stdout(self) -> None:
-        stdout = io.StringIO()
+            with path.open("rb") as stream:
+                result = tomllib.load(stream)
 
-        with (
-            patch("builtins.input", return_value="z = 3\na = 1\n"),
-            redirect_stdout(stdout),
-        ):
-            run()
-
-        self.assertEqual(stdout.getvalue(), "a = 1\nz = 3\n")
-
-
-class TestMain(unittest.TestCase):
-    def test_main_accepts_cli_arguments(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            infile = root / "input.toml"
-            outfile = root / "output.toml"
-            infile.write_text("z = 3\na = 1\n", encoding="utf-8")
-
-            main(["--infile", str(infile), "--outfile", str(outfile)])
-
-            self.assertEqual(
-                outfile.read_text(encoding="utf-8"), "a = 1\nz = 3\n"
-            )
-
-    def test_main_accepts_key_and_reverse_arguments(self) -> None:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            root = Path(temp_dir)
-            infile = root / "input.toml"
-            outfile = root / "output.toml"
-            infile.write_text(
-                "[tool.demo]\nvalues = [1, 3, 2]\n", encoding="utf-8"
-            )
-
-            main(
-                [
-                    "--infile",
-                    str(infile),
-                    "--key",
-                    "tool",
-                    "--key",
-                    "demo",
-                    "--key",
-                    "values",
-                    "--reverse",
-                    "--outfile",
-                    str(outfile),
-                ]
-            )
-
-            self.assertEqual(
-                outfile.read_text(encoding="utf-8"),
-                "[tool.demo]\nvalues = [\n    3,\n    2,\n    1,\n]\n",
-            )
+        self.assertEqual(result, {"a": 1, "b": 2})
 
 
 if __name__ == "__main__":
