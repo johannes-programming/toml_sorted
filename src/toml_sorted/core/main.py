@@ -4,12 +4,15 @@ import sys
 from collections.abc import Iterable
 from typing import Any, Optional
 
+import setdoc
+
 from ..enum.Instruction import Instruction
 from .run import run
 
 __all__ = ["main"]
 
 
+@setdoc.basic
 def main(args: Optional[Iterable[str]] = None, /) -> None:
     kwargs: dict[str, Any]
     parser: argparse.ArgumentParser
