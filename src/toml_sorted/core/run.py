@@ -7,7 +7,7 @@ from typing import Any, cast
 import setdoc
 import tomli_w
 
-from ..enum.Instruction import Instruction
+from toml_sorted.enum.Instruction import Instruction
 
 __all__ = ["run"]
 
@@ -80,6 +80,16 @@ def run_instruction_on_data(
     return data
 
 
+def run_instruction_on_value(data: Any, *, reverse: bool) -> Any:
+    if isinstance(data, dict):
+        return dict(sorted(data.items(), reverse=reverse))
+    if isinstance(data, list):
+        return list(sorted(data, reverse=reverse))
+    raise TypeError(
+        f"Value {data!r} of type {type(data).__name__} cannot be sorted!"
+    )
+
+
 def run_instructions_on_files(
     *,
     absfiles: list[str],
@@ -98,13 +108,3 @@ def run_instructions_on_files(
             )
         with open(absfile, "wb") as stream:
             tomli_w.dump(data, stream)
-
-
-def run_instruction_on_value(data: Any, *, reverse: bool) -> Any:
-    if isinstance(data, dict):
-        return dict(sorted(data.items(), reverse=reverse))
-    if isinstance(data, list):
-        return list(sorted(data, reverse=reverse))
-    raise TypeError(
-        f"Value {data!r} of type {type(data).__name__} cannot be sorted!"
-    )
