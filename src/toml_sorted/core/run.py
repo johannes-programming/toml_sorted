@@ -89,6 +89,12 @@ def run_instruction_along_keys(
             instruction=instruction,
             keys=rest,
         )
+    if head is Selector.ALL_INDICES:
+        return run_instruction_on_all_indices(
+            data,
+            instruction=instruction,
+            keys=rest,
+        )
     data[head] = run_instruction_along_keys(
         data[head],
         instruction=instruction,
@@ -113,6 +119,18 @@ def run_instruction_on_all_keys(
                 keys=keys,
             )
         return data
+    raise TypeError(
+        f"Value {data!r} of type {type(data).__name__} has no keys to expand!"
+    )
+
+
+def run_instruction_on_all_indices(
+    data: Any,
+    *,
+    instruction: Instruction,
+    keys: list[Selector | int | str],
+) -> Any:
+    index: int
     if isinstance(data, list):
         for index in range(len(data)):
             data[index] = run_instruction_along_keys(
@@ -122,7 +140,7 @@ def run_instruction_on_all_keys(
             )
         return data
     raise TypeError(
-        f"Value {data!r} of type {type(data).__name__} has no keys to expand!"
+        f"Value {data!r} of type {type(data).__name__} has no indices to expand!"
     )
 
 

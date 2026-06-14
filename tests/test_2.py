@@ -84,9 +84,23 @@ class TestAllKeys(unittest.TestCase):
             path = Path(tmpdir) / "example.toml"
             write_toml(path, {"rows": [[3, 1, 2], [9, 8, 7]]})
             # --sort --key=rows --all-keys
+            with self.assertRaises(Exception):
+                run(
+                    str(path),
+                    instructions=[Instruction.SORT, "rows", Selector.ALL_KEYS],
+                )
+
+    def test_all_indices_expands_list_elements(self: Self) -> None:
+        data: dict[str, Any]
+        path: Path
+        tmpdir: str
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = Path(tmpdir) / "example.toml"
+            write_toml(path, {"rows": [[3, 1, 2], [9, 8, 7]]})
+            # --sort --key=rows --all-indices
             run(
                 str(path),
-                instructions=[Instruction.SORT, "rows", Selector.ALL_KEYS],
+                instructions=[Instruction.SORT, "rows", Selector.ALL_INDICES],
             )
             data = read_toml(path)
             self.assertEqual(data["rows"], [[1, 2, 3], [7, 8, 9]])
