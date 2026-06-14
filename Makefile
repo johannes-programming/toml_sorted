@@ -54,8 +54,8 @@ test:
 	conda run -n test311 pip install -e . >/dev/null;
 	conda run -n test311 python run_tests.py;
 	conda run -n test311 pip install mypy >/dev/null;
-	conda run -n test311 python -m mypy .;
-	conda run -n test311 python -m mypy -p toml_sorted;
+	conda run -n test311 python -m mypy --strict .;
+	conda run -n test311 python -m mypy --strict -p toml_sorted;
 
 toml_sorted: works
 	conda run -n works pip install 'toml_sorted>=2.0,<3' >/dev/null;

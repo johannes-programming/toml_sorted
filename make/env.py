@@ -6,7 +6,7 @@ from typing import Any, Optional
 __all__ = ["main", "run"]
 
 
-def env_create(env: str, python: Optional[str]) -> subprocess.CompletedProcess:
+def env_create(env: str, python: Optional[str]) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
     args: list[str]
     args = [
         "conda",
@@ -31,7 +31,7 @@ def env_create(env: str, python: Optional[str]) -> subprocess.CompletedProcess:
 def env_list() -> list[str]:
     ans: list[str]
     data: Any
-    result: subprocess.CompletedProcess
+    result: subprocess.CompletedProcess  # type: ignore[type-arg]
     try:
         result = subprocess.run(
             ["conda", "env", "list", "--json"],
@@ -48,7 +48,7 @@ def env_list() -> list[str]:
     return ans
 
 
-def env_remove(env: str) -> subprocess.CompletedProcess:
+def env_remove(env: str) -> subprocess.CompletedProcess:  # type: ignore[type-arg]
     args: list[str]
     args = ["conda", "env", "remove", "-y", "-n", env]
     return subprocess.run(args, check=True)
