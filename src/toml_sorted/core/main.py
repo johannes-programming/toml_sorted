@@ -7,6 +7,7 @@ from typing import Any, Optional
 import setdoc
 
 from ..enum.Instruction import Instruction
+from ..enum.Selector import Selector
 from .run import run
 
 __all__ = ["main"]
@@ -32,6 +33,12 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         action="append",
         dest="instructions",
         type=int,
+    )
+    parser.add_argument(
+        "--all-keys",
+        action="append_const",
+        const=Selector.ALL_KEYS,
+        dest="instructions",
     )
     parser.add_argument(
         "--sort",
