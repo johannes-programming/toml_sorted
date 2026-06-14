@@ -1,4 +1,3 @@
-import io
 import tempfile
 import tomllib
 import unittest
@@ -18,7 +17,7 @@ class TestCliAllIndices(unittest.TestCase):
         dataA: dict[str, Any]
         listA: list[str]
         path: Path
-        stream: io.BufferedWriter
+        stream: Any
         tmpdir: str
         dataA = {
             "items": [
