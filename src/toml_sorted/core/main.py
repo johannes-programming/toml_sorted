@@ -24,6 +24,18 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         default=[],
     )
     parser.add_argument(
+        "--all-indices",
+        action="append_const",
+        const=Selector.ALL_INDICES,
+        dest="instructions",
+    )
+    parser.add_argument(
+        "--all-keys",
+        action="append_const",
+        const=Selector.ALL_KEYS,
+        dest="instructions",
+    )
+    parser.add_argument(
         "--key",
         action="append",
         dest="instructions",
@@ -33,12 +45,6 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         action="append",
         dest="instructions",
         type=int,
-    )
-    parser.add_argument(
-        "--all-keys",
-        action="append_const",
-        const=Selector.ALL_KEYS,
-        dest="instructions",
     )
     parser.add_argument(
         "--sort",

@@ -48,7 +48,7 @@ Testing
 -------
 
 This project can be tested through its ``run_tests.py`` script
-which runs the tests in its ``test/`` dir.
+which runs the tests in its ``tests/`` dir.
 
 License
 -------
