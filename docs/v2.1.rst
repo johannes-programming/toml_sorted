@@ -11,7 +11,7 @@ Open your terminal and run:
 
 .. code-block:: shell
 
-        pip install toml_sorted
+    pip install toml_sorted
 
 Typing
 ------
@@ -31,29 +31,43 @@ This function is the CLI implementation of ``run``.
 
 It accepts these instruction flags, applied in the order given:
 
-- ``--sort`` starts a new sort instruction (ascending).
-- ``--sort-reverse`` starts a new sort instruction (descending).
-- ``--key=NAME`` descends into the table key ``NAME``.
-- ``--index=N`` descends into the array element ``N``.
-- ``--all-keys`` expands the current table or array, applying the rest
-    of the instruction (any remaining ``--key``/``--index`` steps and the
-    sort itself) to every value in turn.
+.. code-block:: shell
 
-For example::
-
-        toml_sorted example.toml --sort --key=foo --all-keys --index=0
+    python -m toml_sorted example.toml --sort --key=foo --all-keys --index=0
 
 turns
 
-.. code-block:: python
+.. code-block:: toml
 
-        {"foo": {"bar": [[4, 2], {}], "baz": [{"a": 9, "c": 8, "b": 7}]}}
+    # example.toml
+    [foo]
+    bar = [
+        [
+            4,
+            2,
+        ],
+        {},
+    ]
+    baz = [
+        { a = 9, c = 8, b = 7 },
+    ]
 
 into
 
-.. code-block:: python
+.. code-block:: toml
 
-        {"foo": {"bar": [[2, 4], {}], "baz": [{"a": 9, "b": 7, "c": 8}]}}
+    # example.toml
+    [foo]
+    bar = [
+        [
+            2,
+            4,
+        ],
+        {},
+    ]
+    baz = [
+        { a = 9, b = 7, c = 8 },
+    ]
 
 ``toml_sorted.core.run.run(*filepatterns: str, instructions: Iterable[Instruction | Selector | int | str] = ()) -> None``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,9 +90,18 @@ into
 ``ALL_KEYS``
 ^^^^^^^^^^^^
 
-A path token that, instead of descending into a single key or index,
-expands the current table or array and applies the remaining path and
-the sort to every value. It is produced by the ``--all-keys`` flag.
+A path token that, instead of descending into a single key,
+expands the current table and applies the remaining path and
+the sort to every value.
+It is produced by the ``--all-keys`` flag.
+
+``ALL_INDICES``
+^^^^^^^^^^^^^^^
+
+A path token that, instead of descending into a single index,
+expands the current array and applies the remaining path and
+the sort to every value.
+It is produced by the ``--all-indices`` flag.
 
 Testing
 -------
