@@ -44,18 +44,11 @@ This function is the CLI implementation of ``run``.
 ``SORT_REVERSE``
 ^^^^^^^^^^^^^^^^
 
-``toml_sorted.tests``
-'''''''''''''''''''''
+Testing
+-------
 
-``test() -> unittest.TextTestResult``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This project can be tested through its ``test`` function.
-
-.. code-block:: python
-
-    import toml_sorted.tests
-    toml_sorted.tests.test()
+This project can be tested through its ``run_tests.py`` script
+which runs the tests in its ``test/`` dir.
 
 License
 -------
