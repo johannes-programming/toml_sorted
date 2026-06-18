@@ -1,0 +1,133 @@
+Overview
+--------
+
+This project sorts TOML data.
+
+Installation
+------------
+
+To install ``toml_sorted``, you can use ``pip``.
+Open your terminal and run:
+
+.. code-block:: shell
+
+    pip install toml_sorted
+
+Typing
+------
+
+This project is strictly typed with ``mypy``.
+
+Features
+--------
+
+``toml_sorted.core``
+''''''''''''''''''''
+
+``toml_sorted.core.main.main(args: Optional[Iterable[str]] = None, /) -> None``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This function is the CLI implementation of ``run``.
+
+It accepts these instruction flags, applied in the order given:
+
+.. code-block:: shell
+
+    python -m toml_sorted example.toml --sort --key=foo --all-keys --index=0
+
+turns
+
+.. code-block:: toml
+
+    # example.toml
+    [foo]
+    bar = [
+        [
+            4,
+            2,
+        ],
+        {},
+    ]
+    baz = [
+        { a = 9, c = 8, b = 7 },
+    ]
+
+into
+
+.. code-block:: toml
+
+    # example.toml
+    [foo]
+    bar = [
+        [
+            2,
+            4,
+        ],
+        {},
+    ]
+    baz = [
+        { a = 9, b = 7, c = 8 },
+    ]
+
+``toml_sorted.core.run.run(*filepatterns: str, instructions: Iterable[Instruction | Selector | int | str] = ()) -> None``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``toml_sorted.enum``
+''''''''''''''''''''
+
+``class toml_sorted.enum.Instruction.Instruction``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``SORT``
+^^^^^^^^
+
+``SORT_REVERSE``
+^^^^^^^^^^^^^^^^
+
+``class toml_sorted.enum.Selector.Selector``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``ALL_KEYS``
+^^^^^^^^^^^^
+
+A path token that, instead of descending into a single key,
+expands the current table and applies the remaining path and
+the sort to every value.
+It is produced by the ``--all-keys`` flag.
+
+``ALL_INDICES``
+^^^^^^^^^^^^^^^
+
+A path token that, instead of descending into a single index,
+expands the current array and applies the remaining path and
+the sort to every value.
+It is produced by the ``--all-indices`` flag.
+
+Testing
+-------
+
+This project can be tested through its ``run_tests.py`` script
+which runs the tests in its ``tests/`` dir.
+
+License
+-------
+
+This project is licensed under the MIT License.
+
+Links
+-----
+
+- Download: https://pypi.org/project/toml_sorted/#files
+- Index: https://pypi.org/project/toml_sorted/
+- Source: https://github.com/johannes-programming/toml_sorted/
+- Website: https://toml-sorted.johannes-programming.online/
+
+Impressum
+---------
+
+**Johannes Programming**
+
+- Name: Johannes
+- Email: johannes.programming@gmail.com
+- Homepage: https://www.johannes-programming.online/
+- Gravatar: https://www.johannes-programming.fyi/

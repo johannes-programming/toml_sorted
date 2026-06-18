@@ -8,6 +8,7 @@ import setdoc
 import tomli_w
 
 from toml_sorted.enum.Instruction import Instruction
+from toml_sorted.enum.Selector import Selector
 
 __all__ = ["run"]
 
@@ -29,10 +30,10 @@ def get_absfiles(filepatterns: Iterable[str]) -> list[str]:
 
 
 def parse_instructions(
-    instructions: Iterable[Instruction | int | str] = (),
-) -> list[tuple[Instruction, list[int | str]]]:
-    ans: list[tuple[Instruction, list[int | str]]]
-    x: Instruction | int | str
+    instructions: Iterable[Instruction | Selector | int | str] = (),
+) -> list[tuple[Instruction, list[Selector | int | str]]]:
+    ans: list[tuple[Instruction, list[Selector | int | str]]]
+    x: Instruction | Selector | int | str
     ans = list()
     for x in instructions:
         if isinstance(x, Instruction):
@@ -45,10 +46,10 @@ def parse_instructions(
 @setdoc.basic
 def run(
     *filepatterns: str,
-    instructions: Iterable[Instruction | int | str] = (),
+    instructions: Iterable[Instruction | Selector | int | str] = (),
 ) -> None:
     absfiles: list[str]
-    parsed: list[tuple[Instruction, list[int | str]]]
+    parsed: list[tuple[Instruction, list[Selector | int | str]]]
     parsed = parse_instructions(instructions)
     absfiles = get_absfiles(filepatterns)
     run_instructions_on_files(absfiles=absfiles, parsed=parsed)
@@ -57,27 +58,90 @@ def run(
 def run_instruction_on_data(
     *,
     instruction: Instruction,
-    keys: list[int | str],
+    keys: list[Selector | int | str],
     data: dict[str, Any],
 ) -> dict[str, Any]:
-    target: Any
-    keys_ = list(keys)
-    if not len(keys_):
-        return cast(
-            dict[str, Any],
-            run_instruction_on_value(
-                data,
-                reverse=instruction.value,
-            ),
+    return cast(
+        dict[str, Any],
+        run_instruction_along_keys(
+            data,
+            instruction=instruction,
+            keys=list(keys),
+        ),
+    )
+
+
+def run_instruction_along_keys(
+    data: Any,
+    *,
+    instruction: Instruction,
+    keys: list[Selector | int | str],
+) -> Any:
+    head: Selector | int | str
+    rest: list[Selector | int | str]
+    if not len(keys):
+        return run_instruction_on_value(data, reverse=instruction.value)
+    head = keys[0]
+    rest = keys[1:]
+    if head is Selector.ALL_KEYS:
+        return run_instruction_on_all_keys(
+            data,
+            instruction=instruction,
+            keys=rest,
         )
-    target = data
-    while len(keys_) > 1:
-        target = target[keys_.pop(0)]
-    target[keys_[0]] = run_instruction_on_value(
-        target[keys_[0]],
-        reverse=instruction.value,
+    if head is Selector.ALL_INDICES:
+        return run_instruction_on_all_indices(
+            data,
+            instruction=instruction,
+            keys=rest,
+        )
+    data[head] = run_instruction_along_keys(
+        data[head],
+        instruction=instruction,
+        keys=rest,
     )
     return data
+
+
+def run_instruction_on_all_keys(
+    data: Any,
+    *,
+    instruction: Instruction,
+    keys: list[Selector | int | str],
+) -> Any:
+    index: int
+    key: Any
+    if isinstance(data, dict):
+        for key in list(data.keys()):
+            data[key] = run_instruction_along_keys(
+                data[key],
+                instruction=instruction,
+                keys=keys,
+            )
+        return data
+    raise TypeError(
+        f"Value {data!r} of type {type(data).__name__} has no keys to expand!"
+    )
+
+
+def run_instruction_on_all_indices(
+    data: Any,
+    *,
+    instruction: Instruction,
+    keys: list[Selector | int | str],
+) -> Any:
+    index: int
+    if isinstance(data, list):
+        for index in range(len(data)):
+            data[index] = run_instruction_along_keys(
+                data[index],
+                instruction=instruction,
+                keys=keys,
+            )
+        return data
+    raise TypeError(
+        f"Value {data!r} of type {type(data).__name__} has no indices to expand!"
+    )
 
 
 def run_instruction_on_value(data: Any, *, reverse: bool) -> Any:
@@ -93,7 +157,7 @@ def run_instruction_on_value(data: Any, *, reverse: bool) -> Any:
 def run_instructions_on_files(
     *,
     absfiles: list[str],
-    parsed: list[tuple[Instruction, list[int | str]]],
+    parsed: list[tuple[Instruction, list[Selector | int | str]]],
 ) -> None:
     absfile: str
     data: Any

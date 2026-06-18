@@ -7,6 +7,7 @@ from typing import Any, Optional
 import setdoc
 
 from ..enum.Instruction import Instruction
+from ..enum.Selector import Selector
 from .run import run
 
 __all__ = ["main"]
@@ -21,6 +22,18 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
         "filepatterns",
         nargs="*",
         default=[],
+    )
+    parser.add_argument(
+        "--all-indices",
+        action="append_const",
+        const=Selector.ALL_INDICES,
+        dest="instructions",
+    )
+    parser.add_argument(
+        "--all-keys",
+        action="append_const",
+        const=Selector.ALL_KEYS,
+        dest="instructions",
     )
     parser.add_argument(
         "--key",
