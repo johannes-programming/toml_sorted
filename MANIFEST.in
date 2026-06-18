@@ -1,3 +1,2 @@
-include run_tests.py
 recursive-include docs *.rst
 recursive-include src/toml_sorted *.toml
