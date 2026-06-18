@@ -50,5 +50,5 @@ def main(args: Optional[Iterable[str]] = None, /) -> None:
     try:
         run(*kwargs.pop("filepatterns"), **kwargs)
     except Exception:
-        logging.exception("toml_sort failed!")
+        logging.exception("toml_sorted failed!")
         sys.exit(1)
